@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+USERNAME="admin"
+PASSWORD="1234"
+
 record_file="students.db"
 temp_file="/tmp/students.$$"
 
@@ -16,6 +20,35 @@ confirm(){
         y|Y|yes|YES) return 0;;
         *) echo "Cancelled"; return 1;;
     esac
+}
+
+
+login(){
+clear
+echo "=============================="
+echo "   STUDENT MANAGEMENT LOGIN"
+echo "=============================="
+
+attempt=0
+
+while [ $attempt -lt 3 ]
+do
+    read -p "Username: " user
+    read -s -p "Password: " pass
+    echo ""
+
+    if [[ "$user" == "$USERNAME" && "$pass" == "$PASSWORD" ]]; then
+        echo " Login successful!"
+        sleep 1
+        return 0
+    else
+        echo " Invalid credentials"
+        attempt=$((attempt+1))
+    fi
+done
+
+echo "Too many failed attempts. Exiting..."
+exit
 }
 
 menu(){
@@ -49,7 +82,6 @@ read gpa
 echo "Enter Phone Number:"
 read phone
 
-echo "Adding record..."
 echo "$id,$name,$dept,$gpa,$phone" >> "$record_file"
 echo " Student added successfully!"
 pause
@@ -72,7 +104,6 @@ grep -i "$search" "$record_file" > "$temp_file"
 if [ ! -s "$temp_file" ]; then
     echo "No student found."
 else
-    echo "Found:"
     column -t -s, "$temp_file"
 fi
 pause
@@ -104,7 +135,10 @@ if confirm; then
 fi
 }
 
-# 🔁 Main Loop
+# Run Login First
+login
+
+#  Main Loop
 while true
 do
     menu
