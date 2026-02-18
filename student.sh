@@ -4,23 +4,12 @@
 USERNAME="admin"
 PASSWORD="1234"
 
+
 record_file="students.db"
 temp_file="/tmp/students.$$"
 
 touch "$record_file"
 trap 'rm -f "$temp_file"' EXIT
-
-pause(){
-    read -p "Press Enter to continue..."
-}
-
-confirm(){
-    read -p "Are you sure? (y/n): " ans
-    case "$ans" in
-        y|Y|yes|YES) return 0;;
-        *) echo "Cancelled"; return 1;;
-    esac
-}
 
 
 login(){
@@ -51,6 +40,21 @@ echo "Too many failed attempts. Exiting..."
 exit
 }
 
+
+pause(){
+    read -p "Press Enter to continue..."
+}
+
+confirm(){
+    read -p "Are you sure? (y/n): " ans
+    case "$ans" in
+        y|Y|yes|YES) return 0;;
+        *) echo "Cancelled"; return 1;;
+    esac
+}
+
+
+
 menu(){
 clear
 echo "=============================="
@@ -65,6 +69,7 @@ echo "6. Exit"
 echo "=============================="
 read -p "Enter choice: " choice
 }
+
 
 add_student(){
 echo "Enter Student ID:"
@@ -83,9 +88,10 @@ echo "Enter Phone Number:"
 read phone
 
 echo "$id,$name,$dept,$gpa,$phone" >> "$record_file"
-echo " Student added successfully!"
+echo "✅ Student added successfully!"
 pause
 }
+
 
 view_students(){
 echo "===== Student List ====="
@@ -97,6 +103,7 @@ fi
 pause
 }
 
+
 search_student(){
 read -p "Enter name or ID to search: " search
 grep -i "$search" "$record_file" > "$temp_file"
@@ -104,10 +111,12 @@ grep -i "$search" "$record_file" > "$temp_file"
 if [ ! -s "$temp_file" ]; then
     echo "No student found."
 else
+    echo "Found:"
     column -t -s, "$temp_file"
 fi
 pause
 }
+
 
 delete_student(){
 view_students
@@ -122,6 +131,7 @@ fi
 pause
 }
 
+
 edit_student(){
 view_students
 read -p "Enter student ID to edit: " id
@@ -135,10 +145,12 @@ if confirm; then
 fi
 }
 
-# Run Login First
+
+
+
 login
 
-#  Main Loop
+
 while true
 do
     menu
