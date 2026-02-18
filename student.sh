@@ -51,7 +51,7 @@ read phone
 
 echo "Adding record..."
 echo "$id,$name,$dept,$gpa,$phone" >> "$record_file"
-echo " Student added successfully!"
+echo "Student added successfully!"
 pause
 }
 
