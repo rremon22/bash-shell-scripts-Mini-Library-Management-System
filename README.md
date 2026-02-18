@@ -1,1 +1,1 @@
-# bash-shell-scripts-Mini-Library-Management-System
+# bash-shell-scripts-Book-Management-System
