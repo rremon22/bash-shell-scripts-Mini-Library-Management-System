@@ -104,7 +104,7 @@ if confirm; then
 fi
 }
 
-# 🔁 Main Loop
+# Main Loop
 while true
 do
     menu
