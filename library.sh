@@ -1,175 +1,120 @@
-menu_choice=""
-record_file="bookRecords.ldb"
-temp_file=/tmp/ldb.$$
-touch $temp_file; chmod 644 $temp_file
-trap 'rm -f $temp_file' EXIT
+#!/bin/bash
 
+record_file="bookStore.db"
+temp_file="/tmp/bookstore.$$"
 
-get_return(){
-printf '\tPress return\n'
-read x
-return 0
+touch "$record_file"
+trap 'rm -f "$temp_file"' EXIT
+
+pause(){
+    read -p "Press Enter to continue..."
 }
 
-get_confirm(){
-printf '\tAre you sure?\n'
-while true
-do
-  read x
-  case "$x" in
-      y|yes|Y|Yes|YES)
-      return 0;;
-      n|no|N|No|NO)
-          printf '\ncancelled\n'
-          return 1;;
-      *) printf 'Please enter yes or no';;
-  esac
-done
+confirm(){
+    read -p "Are you sure? (y/n): " ans
+    case "$ans" in
+        y|Y|yes|YES) return 0;;
+        *) echo "Cancelled"; return 1;;
+    esac
 }
 
-set_menu_choice(){
+menu(){
 clear
-printf 'Options:-'
-printf '\n'
-printf '\ta) Add new Books records\n'
-printf '\tb) Find Books\n'
-printf '\tc) Edit Books\n'
-printf '\td) Remove Books\n'
-printf '\te) View Books\n'
-printf '\tf) Quit\n'
-printf 'Please enter the choice then press return\n'
-read menu_choice
-return
+echo "=============================="
+echo "   BOOK STORE MANAGEMENT"
+echo "=============================="
+echo "1. Add Book"
+echo "2. Search Book"
+echo "3. Edit Book"
+echo "4. Delete Book"
+echo "5. View All Books"
+echo "6. Exit"
+echo "=============================="
+read -p "Enter choice: " choice
 }
 
-insert_record(){
-echo $* >>$record_file
-return
-}
+add_book(){
+echo "Enter Book Category:"
+read category
 
+echo "Enter Book Title:"
+read title
 
-add_books(){
+echo "Enter Author Name:"
+read author
 
-printf 'Enter Books category:-'
-read tmp
-liCatNum=${tmp%%,*}
+echo "Enter Price:"
+read price
 
-printf 'Enter Books title:-'
-read tmp
-liTitleNum=${tmp%%,*}
+echo "Enter Quantity:"
+read qty
 
-printf 'Enter Auther Name:-'
-read tmp
-liAutherNum=${tmp%%,*}
-
-printf 'About to add new entry\n'
-printf "$liCatNum\t$liTitleNum\t$liAutherNum\n"
-
-if get_confirm; then
-   insert_record $liCatNum,$liTitleNum,$liAutherNum
-fi
-
-return
-}
-
-find_books(){
-  echo "Enter book title to find:"
-  read book2find
-  grep $book2find $record_file > $temp_file
-
-  linesfound=`cat $temp_file|wc -l`
-
-  case `echo $linesfound` in
-  0)    echo "Sorry, nothing found"
-        get_return
-        return 0
-        ;;
-  *)    echo "Found the following"
-        cat $temp_file
-        get_return
-        return 0
-  esac
-return
-}
-
-remove_books() {
-
-  linesfound=`cat $record_file|wc -l`
-
-   case `echo $linesfound` in
-   0)    echo "Sorry, nothing found\n"
-         get_return
-         return 0
-         ;;
-   *)    echo "Found the following\n"
-         cat $record_file ;;
-        esac
- printf "Type the books titel which you want to delete\n"
- read searchstr
-
-  if [ "$searchstr" = "" ]; then
-      return 0
-   fi
- grep -v "$searchstr" $record_file > $temp_file
- mv $temp_file $record_file
- printf "Book has been removed\n"
- get_return
-return
+echo "Adding record..."
+echo "$category,$title,$author,$price,$qty" >> "$record_file"
+echo "✅ Book added successfully!"
+pause
 }
 
 view_books(){
-printf "List of books are\n"
-
-cat $record_file
-get_return
-return
-}
-
-
-
-edit_books(){
-
-printf "list of books are\n"
-cat $record_file
-printf "Type the tile of book you want to edit\n"
-read searchstr
-  if [ "$searchstr" = "" ]; then
-     return 0
-  fi
-  grep -v "$searchstr" $record_file > $temp_file
-  mv $temp_file $record_file
-printf "Enter the new record"
-add_books
-
-}
-
-rm -f $temp_file
-if [!-f $record_file];then
-touch $record_file
+echo "===== Book List ====="
+if [ ! -s "$record_file" ]; then
+    echo "No records found."
+else
+    column -t -s, "$record_file"
 fi
+pause
+}
 
-clear
-printf '\n\n\n'
-printf 'Mini library Management'
-sleep 2
+search_book(){
+read -p "Enter title to search: " search
+grep -i "$search" "$record_file" > "$temp_file"
 
-quit="n"
-while [ "$quit" != "y" ];
+if [ ! -s "$temp_file" ]; then
+    echo "No book found."
+else
+    echo "Found:"
+    column -t -s, "$temp_file"
+fi
+pause
+}
+
+delete_book(){
+view_books
+read -p "Enter title to delete: " title
+
+grep -iv "$title" "$record_file" > "$temp_file"
+
+if confirm; then
+    mv "$temp_file" "$record_file"
+    echo "Book deleted."
+fi
+pause
+}
+
+edit_book(){
+view_books
+read -p "Enter title to edit: " title
+
+grep -iv "$title" "$record_file" > "$temp_file"
+
+if confirm; then
+    mv "$temp_file" "$record_file"
+    echo "Enter new book details:"
+    add_book
+fi
+}
+
+# 🔁 Main Loop
+while true
 do
-
-set_menu_choice
-case "$menu_choice" in
-a) add_books;;
-b) find_books;;
-c) edit_books;;
-d) remove_books;;
-e) view_books;;
-f) quit=y;;
-*) printf "Sorry, choice not recognized";;
-esac
+    menu
+    case $choice in
+        1) add_book;;
+        2) search_book;;
+        3) edit_book;;
+        4) delete_book;;
+        5) view_books;;
+        6) echo "Goodbye!"; exit;;
+        *) echo "Invalid choice"; pause;;
+    esac
 done
-
-rm -f $temp_file
-echo "Finished"
-
-exit 0
