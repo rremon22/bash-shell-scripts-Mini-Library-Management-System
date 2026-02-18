@@ -1,45 +1,10 @@
 #!/bin/bash
 
-
-USERNAME="admin"
-PASSWORD="1234"
-
-
 record_file="students.db"
 temp_file="/tmp/students.$$"
 
 touch "$record_file"
 trap 'rm -f "$temp_file"' EXIT
-
-
-login(){
-clear
-echo "=============================="
-echo "   STUDENT MANAGEMENT LOGIN"
-echo "=============================="
-
-attempt=0
-
-while [ $attempt -lt 3 ]
-do
-    read -p "Username: " user
-    read -s -p "Password: " pass
-    echo ""
-
-    if [[ "$user" == "$USERNAME" && "$pass" == "$PASSWORD" ]]; then
-        echo " Login successful!"
-        sleep 1
-        return 0
-    else
-        echo " Invalid credentials"
-        attempt=$((attempt+1))
-    fi
-done
-
-echo "Too many failed attempts. Exiting..."
-exit
-}
-
 
 pause(){
     read -p "Press Enter to continue..."
@@ -53,12 +18,10 @@ confirm(){
     esac
 }
 
-
-
 menu(){
 clear
 echo "=============================="
-echo "   STUDENT MANAGEMENT SYSTEM"
+echo "   Mini STUDENT MANAGEMENT SYSTEM"
 echo "=============================="
 echo "1. Add Student"
 echo "2. Search Student"
@@ -69,7 +32,6 @@ echo "6. Exit"
 echo "=============================="
 read -p "Enter choice: " choice
 }
-
 
 add_student(){
 echo "Enter Student ID:"
@@ -87,11 +49,11 @@ read gpa
 echo "Enter Phone Number:"
 read phone
 
+echo "Adding record..."
 echo "$id,$name,$dept,$gpa,$phone" >> "$record_file"
-echo "✅ Student added successfully!"
+echo " Student added successfully!"
 pause
 }
-
 
 view_students(){
 echo "===== Student List ====="
@@ -102,7 +64,6 @@ else
 fi
 pause
 }
-
 
 search_student(){
 read -p "Enter name or ID to search: " search
@@ -117,7 +78,6 @@ fi
 pause
 }
 
-
 delete_student(){
 view_students
 read -p "Enter student ID to delete: " id
@@ -130,7 +90,6 @@ if confirm; then
 fi
 pause
 }
-
 
 edit_student(){
 view_students
@@ -145,12 +104,7 @@ if confirm; then
 fi
 }
 
-
-
-
-login
-
-
+# 🔁 Main Loop
 while true
 do
     menu
