@@ -1,1 +1,1 @@
-# bash-shell-scripts-Book-Management-System
+# bash-shell-scripts-Student-Management-System
